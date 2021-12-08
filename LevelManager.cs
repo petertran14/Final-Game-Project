@@ -37,6 +37,8 @@ public class LevelManager : MonoBehaviour {
             }
         }
 
+        // Probably the culprit here...
+
         // Loop through each Intersection
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
@@ -44,24 +46,24 @@ public class LevelManager : MonoBehaviour {
                 // Current Intersection
                 Intersection curInter = cityGrid[i, j];
 
-                //Checks if there is a viable intersection to the RIGHT
+                //Checks if there is a viable intersection in the NORTH direction
                 if (j + 1 != col) {
-                    curInter.east = cityGrid[i, j + 1]; 
+                    curInter.north = cityGrid[i, j + 1]; 
                 }
 
-                //Check LEFT
+                //Check DOWN
                 if (j != 0) {
-                    curInter.west = cityGrid[i, j - 1];
+                    curInter.south = cityGrid[i, j - 1];
                 }
 
                 //Checks UP
                 if (i + 1 != row) {
-                    curInter.north = cityGrid[i + 1, j]; 
+                    curInter.east = cityGrid[i + 1, j]; 
                 }
 
                 //Checks DOWN
                 if (i != 0) {
-                    curInter.south = cityGrid[i - 1, j]; 
+                    curInter.west = cityGrid[i - 1, j]; 
                 }
 
             }
@@ -94,8 +96,14 @@ public class LevelManager : MonoBehaviour {
         }
     }
 
-    // Update is called once per frame
-    void Update() {
-        
+    public void printNodePositions()
+    {
+        for (int i = 0; i < row; i++)
+        {
+            for (int j = 0; j < col; j++)
+            {
+                Debug.Log("CityGrid[" + cityGrid[i, j].getXPosGrid() + "," + cityGrid[i, j].getYPosGrid() + "] = " + cityGrid[i, j].mapPosition.x + " " + cityGrid[i, j].mapPosition.y + " " + cityGrid[i, j].mapPosition.z);
+            }
+        }
     }
 }
