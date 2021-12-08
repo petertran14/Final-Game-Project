@@ -24,6 +24,9 @@ public class NPC_Car : MonoBehaviour
     private string direction;
     private bool isFirstTime;
 
+    // Everytime the car is at a node, isShifted is set to false so we can adjust it's position a singular time. Then while the car is driving isShfited is true so we won't adjust with each update call
+    private bool isShifted;
+
     // Car must satisfy the constraints above
     private bool isValid;
 
@@ -36,6 +39,11 @@ public class NPC_Car : MonoBehaviour
         // Creating the grid and all the intersection information as detailed in LevelManager
         traversableNodes = gameObject.AddComponent<LevelManager>();
         isFirstTime = true;
+
+        // In the beginning, the car is not yet shifted
+        this.isShifted = false;
+
+        // traversableNodes.printNodePositions();
 
         // Find the current node
         currNode = findCurrentNode();
@@ -76,29 +84,27 @@ public class NPC_Car : MonoBehaviour
 
     private void moveTowardsNextIntersection()
     {
-        //Debug.Log("Car's Position: " + transform.position.x + " " + transform.position.y + " " + transform.position.z);
+        // Debug.Log("Car's Position: " + transform.position.x + " " + transform.position.y + " " + transform.position.z);
         // In inspector change the radius and height to 0.
 
-        // The car needs to be pointing its front towards in the direction of "direction"
-        // North is 0 degrees rotation about y axis
         if (direction.Equals("north")) {
-            transform.rotation = Quaternion.Euler(0, 0, 0);
+            AdjustCarPosition("north");
         }
-        // South is 180 degrees rotation about y axis
-        if (direction.Equals("south")) {
-            transform.rotation = Quaternion.Euler(0, 180, 0);
+        
+        else if (direction.Equals("south")) {
+            AdjustCarPosition("south");
         }
-        // East is 90 degrees rotation about y axis
-        if (direction.Equals("east")) {
-            transform.rotation = Quaternion.Euler(0, 90, 0);
+        
+        else if (direction.Equals("east")) {
+            AdjustCarPosition("east");
         }
-        // West is 270 degrees rotation about y axis
-        if (direction.Equals("west")) {
-            transform.rotation = Quaternion.Euler(0, 270, 0);
+        
+        else if (direction.Equals("west")) {
+            AdjustCarPosition("west");
         }
 
         // Start function chose next node to move to, so that means at this point the car has a direction, and will always have a direction
-        if (direction == null)
+        else
             Debug.Log("The car has no direction. Something bad has happened.");
 
         controller.SimpleMove(transform.TransformDirection(Vector3.forward) * drivingSpeed);
@@ -108,6 +114,7 @@ public class NPC_Car : MonoBehaviour
         {
             Debug.Log("Current Node = Next Node");            
             currNode = nextNode;
+            this.isShifted = false;
         }
 
         // If the currNode == nextNode then I need to advance the next node
@@ -123,6 +130,79 @@ public class NPC_Car : MonoBehaviour
     }
 
     /// <summary>
+    /// Adjusts the car's position so that it stays on it's own lane, with each subsequent turn. Also adjust car orientation to match direction.
+    /// </summary>
+    public void AdjustCarPosition(string dir)
+    {
+        if (dir.Equals("north"))
+        {
+            // North is 0 degrees rotation about y axis
+            transform.rotation = Quaternion.Euler(0, 0, 0);
+            // A car moving north is +2.5 in the x direction from the current node
+            if (!isShifted)
+            {
+                // The character controller has it's own instance of position, so we need to temporarily deactivate it's default position so we can start with a modified position
+                controller.enabled = false;
+                controller.transform.position = new Vector3(this.currNode.getMapPosition().x + 2.5f, this.currNode.getMapPosition().y, this.currNode.getMapPosition().z); ;
+                controller.enabled = true;
+            }
+
+            isShifted = true;
+        }
+
+        else if (dir.Equals("south"))
+        {
+            // South is 180 degrees rotation about y axis
+            transform.rotation = Quaternion.Euler(0, 180, 0);
+            // A car moving south is -2.5 in the x direction from the current node
+            if (!isShifted)
+            {
+
+                controller.enabled = false;
+                controller.transform.position = new Vector3(this.currNode.getMapPosition().x - 2.5f, this.currNode.getMapPosition().y, this.currNode.getMapPosition().z); ;
+                controller.enabled = true;
+            }
+
+            isShifted = true;
+        }
+
+        else if (dir.Equals("east"))
+        {
+            // East is 90 degrees rotation about y axis
+            transform.rotation = Quaternion.Euler(0, 90, 0);
+            // A car moving east is -2.5 in the z direction from the current node
+            if (!isShifted)
+            {
+                controller.enabled = false;
+                controller.transform.position = new Vector3(this.currNode.getMapPosition().x, this.currNode.getMapPosition().y, this.currNode.getMapPosition().z - 2.5f); ;
+                controller.enabled = true;
+            }
+
+            isShifted = true;
+        }
+
+        else if (dir.Equals("west"))
+        {
+            // West is 270 degrees rotation about y axis
+            transform.rotation = Quaternion.Euler(0, 270, 0);
+            // A car moving west is +2.5 in the z direction from the current node
+            if (!isShifted)
+            {
+                controller.enabled = false;
+                controller.transform.position = new Vector3(this.currNode.getMapPosition().x, this.currNode.getMapPosition().y, this.currNode.getMapPosition().z + 2.5f); ;
+                controller.enabled = true;
+            }
+
+            isShifted = true;
+        }
+
+        else
+        {
+            Debug.Log("The car has no direction. Something bad has happened.");
+        }
+    }
+
+    /// <summary>
     /// Returns true or false whether or not the car has arrived at the approximate location of the intersection.
     ///
     /// The problem with comparing using == is that the update frames do not get data continually, but every frame. So it misses the exact moment where the car's position is exactly equal to the node position.
@@ -131,7 +211,7 @@ public class NPC_Car : MonoBehaviour
     /// <returns></returns>
     public bool ArrivedAtIntersection() 
     {
-        if (Vector3.Distance(nextNode.getMapPosition(), transform.position) < 2.0f) {
+        if (Vector3.Distance(nextNode.getMapPosition(), transform.position) < 4.5f) {
             return true;
         }
     
@@ -235,3 +315,4 @@ public class NPC_Car : MonoBehaviour
         return true;
     }
 }
+
