@@ -6,7 +6,7 @@ using UnityEngine;
 /// <summary>
 /// This class defines the location of an intersection on the map, as well as pointing to it's neighbors.
 /// </summary>
-public class Intersection : MonoBehaviour {
+public class Intersection {
     // Intersections to the north, south, east, and west of the current intersection
     public Intersection north;
     public Intersection south;
@@ -99,5 +99,20 @@ public class Intersection : MonoBehaviour {
     public void setMapPosition(Vector3 mapPosition)
     {
         this.mapPosition = mapPosition;
+    }
+
+    //We take the center of the intersection
+    //From there we generate all four of the corners of that intersection
+    //Function is used to spawn pedestrians so that they are not in the street. 
+    public Vector3[] getIntersectionCorners() {
+
+        Vector3[] fourCorners = new Vector3[4];
+
+        fourCorners[0] = new Vector3(mapPosition.x - 8, mapPosition.y, mapPosition.z + 8);
+        fourCorners[1] = new Vector3(mapPosition.x + 8, mapPosition.y, mapPosition.z + 8);
+        fourCorners[2] = new Vector3(mapPosition.x - 8, mapPosition.y, mapPosition.z - 8);
+        fourCorners[3] = new Vector3(mapPosition.x + 8, mapPosition.y, mapPosition.z - 8);
+
+        return fourCorners;
     }
 }
