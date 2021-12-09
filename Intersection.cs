@@ -6,7 +6,7 @@ using UnityEngine;
 /// <summary>
 /// This class defines the location of an intersection on the map, as well as pointing to it's neighbors.
 /// </summary>
-public class Intersection {
+public class Intersection : MonoBehaviour {
     // Intersections to the north, south, east, and west of the current intersection
     public Intersection north;
     public Intersection south;
